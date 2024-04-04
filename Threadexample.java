@@ -1,6 +1,5 @@
 // Java program to implement solution of producer
 // consumer problem.
-// fils deee puuuuuuuute
 import java.util.LinkedList;
  
 public class Threadexample {
@@ -11,8 +10,8 @@ public class Threadexample {
         // and consume() methods
         final PC pc = new PC();
  
-        // Create producer thread
-        Thread t1 = new Thread(new Runnable() {
+        // Create producer1 thread
+        Thread producer1 = new Thread(new Runnable() {
             @Override
             public void run()
             {
@@ -25,8 +24,22 @@ public class Threadexample {
             }
         });
  
-        // Create consumer thread
-        Thread t2 = new Thread(new Runnable() {
+        // Create producer2 thread
+        Thread producer2 = new Thread(new Runnable() {
+            @Override
+            public void run()
+            {
+                try {
+                    pc.produce();
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        // Create consumer1 thread
+        Thread consumer1 = new Thread(new Runnable() {
             @Override
             public void run()
             {
@@ -39,74 +52,114 @@ public class Threadexample {
             }
         });
  
+        // Create consumer2 thread
+        Thread consumer2 = new Thread(new Runnable() {
+            @Override
+            public void run()
+            {
+                try {
+                    pc.consume();
+                }
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         // Start both threads
-        t1.start();
-        t2.start();
+        producer1.start();
+        producer2.start();
+        consumer1.start();
+        consumer2.start();
  
         // t1 finishes before t2
-        t1.join();
-        t2.join();
+        producer1.join();
+        producer2.join();
+        consumer1.join();
+        consumer2.join();
     }
  
-    // This class has a list, producer (adds items to list
+    // This class has a list, producer (adds items to list)
     // and consumer (removes items).
     public static class PC {
- 
+
+        // Water tank status
+        double waterLevel = 0.00;
+        // Maximum capacity of the water tank
+        double capacity = 2.00;
+        // Critical level of the water tank
+        double criticalLevel = 0.10 * capacity; // 10% of capacity
+        // Flag to indicate if water level is at or below critical level
+        boolean isCritical = false;
         // Create a list shared by producer and consumer
-        // Size of list is 2.
+        // The list doesn't directly represent the water tank's volume but is used for synchronization.
         LinkedList<Integer> list = new LinkedList<>();
-        int capacity = 2;
- 
+        int listCapacity = 10; // Arbitrary capacity for the list to demonstrate synchronization
+
         // Function called by producer thread
-        public void produce() throws InterruptedException
-        {
+        public void produce() throws InterruptedException {
             int value = 0;
             while (true) {
-                synchronized (this)
-                {
-                    // producer thread waits while list
-                    // is full
-                    while (list.size() == capacity)
+                synchronized (this) {
+                    // Wait while list is full
+                    while (list.size() == listCapacity)
                         wait();
- 
-                    System.out.println("Producer produced-"
-                                       + value);
- 
-                    // to insert the jobs in the list
+
+                    // Simulate adding an operation to the list (not directly related to water volume)
                     list.add(value++);
- 
-                    // notifies the consumer thread that
-                    // now it can start consuming
+
+                    // Increase water level by 0.01 if not full
+                    if (waterLevel < capacity) {
+                        waterLevel += 0.01;
+                        System.out.println("Producing: water tank status: " + waterLevel);
+                    }
+
+                    // If water level is above critical level, set isCritical to false
+                    if (waterLevel > criticalLevel) {
+                        isCritical = false;
+                    }
+
+                    // Notifies the consumer thread that now it can start consuming
                     notify();
- 
-                    // makes the working of program easier
-                    // to  understand
+
+                    // Makes the working of program easier to understand
                     Thread.sleep(1000);
                 }
             }
         }
- 
+
         // Function called by consumer thread
-        public void consume() throws InterruptedException
-        {
+        public void consume() throws InterruptedException {
             while (true) {
-                synchronized (this)
-                {
-                    // consumer thread waits while list
-                    // is empty
+                synchronized (this) {
+                    // If water level is at or below critical level, return immediately
+                    if (isCritical) {
+                        return;
+                    }
+
+                    // Wait while list is empty
                     while (list.size() == 0)
                         wait();
- 
-                    // to retrieve the first job in the list
-                    int val = list.removeFirst();
- 
-                    System.out.println("Consumer consumed-"
-                                       + val);
- 
+
+                    // Simulate removing an operation from the list
+                    list.removeFirst();
+
+                    // Decrease water level by 0.01 if not empty
+                    if (waterLevel > 0) {
+                        waterLevel -= 0.01;
+                        System.out.println("Consuming: water tank status: " + waterLevel);
+                    }
+
+                    // If water level is at or below critical level, set isCritical to true and print warning
+                    if (waterLevel <= criticalLevel) {
+                        isCritical = true;
+                        System.out.println("Warning, water level is lower or equal than 10%");
+                    }
+
                     // Wake up producer thread
                     notify();
- 
-                    // and sleep
+
+                    // Sleep
                     Thread.sleep(1000);
                 }
             }
