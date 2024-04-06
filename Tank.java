@@ -1,58 +1,58 @@
-import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Tank {
     // Water tank status
-    double waterLevel = 0.00;
+    AtomicInteger waterLevel = new AtomicInteger(0);
     // Maximum capacity of the water tank
-    double capacity = 100.00;
-    // Critical level of the water tank
-    double criticalLevel = 0.1 * capacity; // 10% of capacity
+    int capacity = 100;
     // Flag to indicate if water level is at or below critical level
-    boolean isCritical = true;
-    // Create a list shared by producer and consumer
-    // The list doesn't directly represent the water tank's volume but is used for
-    // synchronization.
-    LinkedList<Integer> list = new LinkedList<>();
-    int listCapacity = 10; // Arbitrary capacity for the list to demonstrate synchronization;
+    boolean isCriticalHigh = false;
+    boolean isCriticalLow = true;
 
-    public Tank(double waterLevel) {
+    public Tank(AtomicInteger waterLevel) {
         this.waterLevel = waterLevel;
-        if (waterLevel > criticalLevel) {
-            isCritical = false;
+        if (waterLevel.get() >= 90) {
+            isCriticalHigh = true;
+            isCriticalLow = false;
         } else {
-            isCritical = true;
+            isCriticalHigh = false;
+            isCriticalLow = true;
         }
     }
 
-    public double getWaterLevel() {
+    public AtomicInteger getWaterLevel() {
         return waterLevel;
     }
 
-    public void setWaterLevel(double waterLevel) {
+    public void setWaterLevel(AtomicInteger waterLevel) {
         this.waterLevel = waterLevel;
     }
 
-    public double getCapacity() {
+    public int getCapacity() {
         return capacity;
     }
 
-    public void setCapacity(double capacity) {
-        this.capacity = capacity;
+    public boolean getIsCriticalHigh() {
+        return isCriticalHigh;
     }
 
-    public double getCriticalLevel() {
-        return criticalLevel;
+    public boolean getIsCriticalLow() {
+        return isCriticalLow;
     }
 
-    public boolean getIsCritical() {
-        return isCritical;
+    public void setIsCriticalHigh(AtomicInteger waterLevel) {
+        if (waterLevel.get() >= 90) {
+            isCriticalHigh = true;
+            isCriticalLow = false;
+
+        }
     }
 
-    public void setIsCritical(double waterLevel) {
-        if (waterLevel > criticalLevel) {
-            isCritical = false;
-        } else {
-            isCritical = true;
+    public void setIsCriticalLow(AtomicInteger waterLevel) {
+        if (waterLevel.get() <= 10) {
+            isCriticalHigh = false;
+            isCriticalLow = true;
+
         }
     }
 }

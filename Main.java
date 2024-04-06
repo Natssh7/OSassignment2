@@ -1,16 +1,22 @@
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Main {
-    public static void main(String[] args) {
 
-        // C'est une idée pas dutout définitive pour le main
+    AtomicInteger capacity;
 
-        // Create a new water tank with a water level of 50.00
-        Tank tank = new Tank(100.00);
-        // Create a new producer
-        // Producer producer = new Producer(tank);
-        // Create a new consumer
-        // Consumer consumer = new Consumer(tank);
-        // Start the producer and consumer threads
-        // producer.start();
-        // consumer.start();
+    public static void main(String[] args) throws InterruptedException {
+
+        // waterLevel doit etre mis à la vameur 100
+        AtomicInteger waterLevel = new AtomicInteger(10);
+        // Create a new water tank with a water level of 100
+        Tank tank = new Tank(waterLevel);
+        Producer producer = new Producer(tank.getWaterLevel());
+        Consumer consumer = new Consumer(tank.getWaterLevel());
+
+        producer.start();
+        consumer.start();
+
+        producer.join();
+        consumer.join();
     }
 }
