@@ -1,5 +1,6 @@
 import java.util.LinkedList;
 import java.util.concurrent.Semaphore;
+import java.util.Random;
 
 public class Threadexample {
     public static void main(String[] args) throws InterruptedException {
@@ -76,9 +77,9 @@ public class Threadexample {
         // Maximum capacity of the water tank
         double capacity = 1.00;
         // Critical level of the water tank
-        double criticalLevel = 0.10 * capacity; // 10% of capacity
+        double criticalLevel = 0.40 * capacity; // 10% of capacity
         // Upper threshold of the water tank
-        double upperThreshold = 0.90 * capacity; // 90% of capacity
+        double upperThreshold = 0.60 * capacity; // 90% of capacity
         // Flag to indicate if water level is at or below critical level
         boolean isCritical = false;
         // Flag to indicate if water tank is full
@@ -99,16 +100,24 @@ public class Threadexample {
                     waterLevel += 0.01;
                     waterTank.add(waterLevel);
                     System.out.println("Producing: water tank status: " + String.format("%.2f", waterLevel));
+ 
+                    Random random = new Random();
+                    if (waterLevel > criticalLevel) {
+                        isCritical = false;
+                        if (random.nextBoolean()) { 
+                            waterTank.notifyAll();
+                        }
+                    }
 
                     // If water level is at or above 90%, start consuming
                     if (waterLevel > upperThreshold) {
-                        isCritical = false;
                         isFull = true;
+                        System.out.println("Warning, upper threshold reached!!");
                         waterTank.notifyAll();
-                    }
+                    } 
 
                     // Notify consumer thread
-                    waterTank.notifyAll();
+                    // waterTank.notifyAll();
                 }
 
                 // Makes the working of program easier to understand
@@ -135,6 +144,10 @@ public class Threadexample {
                         waterLevel -= 0.01;
                         waterTank.removeFirst();
                         System.out.println("Consuming: water tank status: " + String.format("%.2f", waterLevel));
+                        Random random2 = new Random(); 
+                        if (random2.nextBoolean()) {
+                            waterTank.notifyAll();
+                        }
                     }
 
                     // If water level is at or below critical level, start producing
@@ -143,10 +156,10 @@ public class Threadexample {
                         isFull = false;
                         System.out.println("Warning, water level is lower or equal to 10%, start producing water");
                         waterTank.notifyAll();
-                    }
+                    } 
 
                     // Notify producer thread
-                    waterTank.notifyAll();
+                    // waterTank.notifyAll();
                 }
 
                 // Sleep
