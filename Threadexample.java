@@ -1,5 +1,4 @@
 import java.util.LinkedList;
-import java.util.concurrent.Semaphore;
 import java.util.Random;
 
 public class Threadexample {
@@ -77,14 +76,16 @@ public class Threadexample {
         // Maximum capacity of the water tank
         double capacity = 1.00;
         // Critical level of the water tank
-        double criticalLevel = 0.40 * capacity; // 10% of capacity
+        double criticalLevel = 0.10 * capacity; // 10% of capacity
         // Upper threshold of the water tank
-        double upperThreshold = 0.60 * capacity; // 90% of capacity
+        double upperThreshold = 0.90 * capacity; // 90% of capacity
         // Flag to indicate if water level is at or below critical level
         boolean isCritical = false;
         // Flag to indicate if water tank is full
         boolean isFull = false;
-        Semaphore semaphore = new Semaphore(1);
+
+        double isMiddle = 0.45 * capacity;
+        
         LinkedList<Double> waterTank = new LinkedList<>();
 
         // Function called by producer thread
@@ -153,17 +154,22 @@ public class Threadexample {
                     // If water level is at or below critical level, start producing
                     if (waterLevel <= criticalLevel) {
                         isCritical = true;
-                        isFull = false;
                         System.out.println("Warning, water level is lower or equal to 10%, start producing water");
                         waterTank.notifyAll();
                     } 
+
+                    if (waterLevel < isMiddle){
+                        isFull = false;
+                    }
 
                     // Notify producer thread
                     // waterTank.notifyAll();
                 }
 
                 // Sleep
-                Thread.sleep(1000);
+                Random mili = new Random();
+                int randomValue = mili.nextInt(5) + 1;
+                Thread.sleep(randomValue*1000);
             }
         }
     }
